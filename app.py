@@ -53,13 +53,16 @@ def handle_front_webhook():
         if not content_sid:
             return jsonify({"status": "noop"}), 200
 
+        if not all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM]):
+            print("Missing Twilio credentials. Skipping send.")
+            return jsonify({"status": "noop"}), 200    
+
         send_status = send_whatsapp_template(recipient, content_sid, {"1": variable_text})
         return jsonify(send_status), 200
 
     except Exception as e:
         print("Exception in webhook:", str(e))
         return jsonify({"status": "noop", "error": str(e)}), 200
-
 
 def send_whatsapp_template(to_number, content_sid, variables):
     url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json"
