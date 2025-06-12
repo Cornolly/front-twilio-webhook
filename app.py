@@ -27,6 +27,57 @@ def home():
 def verify_webhook():
     return jsonify({"status": "ok"}), 200
 
+
+@app.route("/pd-webhook", methods=["POST"])
+def handle_pipedrive_webhook():
+    try:
+        data = request.get_json()
+        print("Received PD webhook:", data)
+
+        # Safety checks
+        if not data or "current" not in data or "meta" not in data:
+            return jsonify({"status": "noop"}), 200
+
+        current = data["current"]
+        person_id = data["meta"].get("id")
+        custom_field_value = current.get("cd83bf5536c29ee8f207e865c81fbad299472bfc")
+
+        if not person_id or not custom_field_value:
+            return jsonify({"status": "noop"}), 200
+
+        # Split the field into template and variable
+        parts = custom_field_value.strip().split(" ", 1)
+        if len(parts) != 2:
+            return jsonify({"status": "noop", "error": "Invalid format"}), 200
+
+        template_name, variable_text = parts
+
+        # Get phone number for this person
+        person_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
+        resp = requests.get(person_url)
+        person_data = resp.json()
+
+        if not person_data.get("data"):
+            return jsonify({"status": "noop", "error": "Person not found"}), 200
+
+        phone = person_data["data"].get("phone", [{}])[0].get("value", "")
+        if not phone:
+            return jsonify({"status": "noop", "error": "No phone number"}), 200
+
+        # Look up template content SID
+        content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
+        if not content_sid:
+            return jsonify({"status": "noop", "error": "Unknown template"}), 200
+
+        send_status = send_whatsapp_template(phone, content_sid, {"1": variable_text})
+        return jsonify(send_status), 200
+
+    except Exception as e:
+        print("Exception in Pipedrive webhook:", str(e))
+        return jsonify({"status": "noop", "error": str(e)}), 200
+
+
+
 @app.route("/front-webhook", methods=["POST"])
 def handle_front_webhook():
     try:
