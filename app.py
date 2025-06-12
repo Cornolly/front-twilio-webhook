@@ -19,6 +19,10 @@ TEMPLATE_CONTENT_MAP = {
     "settlement_received": "<YOUR_OTHER_CONTENT_SID>"  # placeholder
 }
 
+@app.route("/", methods=["GET"])
+def home():
+    return "Webhook server is running", 200
+
 @app.route("/front-webhook", methods=["GET"])
 def verify_webhook():
     return jsonify({"status": "ok"}), 200
