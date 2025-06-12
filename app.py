@@ -39,17 +39,17 @@ def handle_front_webhook():
     recipient = data.get("recipient", {}).get("handle")  # e.g. "+447712345678"
 
     if not comment_body or not recipient:
-        return jsonify({"error": "Missing comment or recipient"}), 400
+        return jsonify({"status": "noop"}), 200
 
     parts = comment_body.strip().split(" ", 1)
     if len(parts) != 2:
-        return jsonify({"error": "Invalid comment format. Use: template_name variable"}), 400
+        return jsonify({"status": "noop"}), 200
 
     template_name, variable_text = parts
 
     content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
     if not content_sid:
-        return jsonify({"error": f"Unknown template: {template_name}"}), 400
+        return jsonify({"status": "noop"}), 200
 
     send_status = send_whatsapp_template(recipient, content_sid, {"1": variable_text})
     return jsonify(send_status)
