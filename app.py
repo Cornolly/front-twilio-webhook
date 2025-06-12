@@ -19,6 +19,9 @@ TEMPLATE_CONTENT_MAP = {
     "settlement_received": "<YOUR_OTHER_CONTENT_SID>"  # placeholder
 }
 
+@app.route("/front-webhook", methods=["GET"])
+def verify_webhook():
+    return jsonify({"status": "ok"}), 200
 
 @app.route("/front-webhook", methods=["POST"])
 def handle_front_webhook():
