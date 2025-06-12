@@ -64,7 +64,6 @@ def handle_front_webhook():
         print("Exception in webhook:", str(e))
         return jsonify({"status": "noop", "error": str(e)}), 200
 
-
 def send_whatsapp_template(to_number, content_sid, variables):
     url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json"
 
