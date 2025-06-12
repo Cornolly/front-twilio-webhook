@@ -16,7 +16,7 @@ TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM")
 # Template-to-ContentSid mapping
 TEMPLATE_CONTENT_MAP = {
     "payment_released": "HX6b4482f404e6b063984df49dc3b3e69c",
-    "settlement_received": "<YOUR_OTHER_CONTENT_SID>"  # placeholder
+    "settlement_received": "HX706c585bc08250b45418ae5c6da063a9" 
 }
 
 @app.route("/", methods=["GET"])
@@ -70,6 +70,7 @@ def handle_pipedrive_webhook():
             return jsonify({"status": "noop", "error": "Unknown template"}), 200
 
         send_status = send_whatsapp_template(phone, content_sid, {"1": variable_text})
+        print("Send status:", send_status)
 
         # ✅ Clear the field to prevent repeat sending
         if send_status.get("status") == "success":
@@ -139,7 +140,15 @@ def send_whatsapp_template(to_number, content_sid, variables):
         "ContentVariables": json.dumps(variables)
     }
 
-    response = requests.post(url, headers=headers, data=payload, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN))
+    print("Sending payload to Twilio:", payload)
+
+    response = requests.post(
+        url, headers=headers, data=payload, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    )
+
+    print("Twilio response code:", response.status_code)
+    print("Twilio response text:", response.text)
+
     if response.status_code == 201:
         return {"status": "success"}
     else:
