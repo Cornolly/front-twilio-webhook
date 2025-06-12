@@ -19,9 +19,13 @@ TEMPLATE_CONTENT_MAP = {
     "settlement_received": "<YOUR_OTHER_CONTENT_SID>"  # placeholder
 }
 
+
 @app.route("/front-webhook", methods=["POST"])
 def handle_front_webhook():
-    data = request.json
+    if not request.is_json:
+        return jsonify({"status": "ok"}), 200
+
+    data = request.json or {}
 
     # Basic logging
     print("Received Front webhook:", data)
