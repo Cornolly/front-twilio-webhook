@@ -70,6 +70,12 @@ def handle_pipedrive_webhook():
             return jsonify({"status": "noop", "error": "Unknown template"}), 200
 
         send_status = send_whatsapp_template(phone, content_sid, {"1": variable_text})
+
+        # ✅ Clear the field to prevent repeat sending
+        if send_status.get("status") == "success":
+            update_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
+            requests.put(update_url, json={ "cd83bf5536c29ee8f207e865c81fbad299472bfc": "" })
+
         return jsonify(send_status), 200
 
     except Exception as e:
