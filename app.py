@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 import os
 import requests
 import json
@@ -22,13 +22,17 @@ TEMPLATE_CONTENT_MAP = {
 
 @app.route("/front-webhook", methods=["POST"])
 def handle_front_webhook():
+    # ✅ Accept and verify Front webhook ping
     if not request.is_json:
+        return make_response("OK", 200)
+
+    data = request.get_json() or {}
+
+    # ✅ If it's a verification test (e.g., missing data), just reply cleanly
+    if "type" not in data:
         return jsonify({"status": "ok"}), 200
 
-    data = request.json or {}
-
-    # Basic logging
-    print("Received Front webhook:", data)
+    print("Received event from Front:", data)
 
     # Get comment body and recipient
     comment_body = data.get("body", "")
