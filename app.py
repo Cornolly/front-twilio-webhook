@@ -60,11 +60,13 @@ def handle_pipedrive_webhook():
 
         if not custom_field_value:
             return jsonify({"status": "noop", "error": "No value in trigger field"}), 200
-  
+
+        print(f"Raw custom field value: '{custom_field_value}'")
 
         # Split the field into template and variable
         parts = custom_field_value.strip().split(" ", 1)
         if len(parts) != 2:
+            print(f"Invalid format after split: {parts}")
             return jsonify({"status": "noop", "error": "Invalid format"}), 200
 
         template_name, variable_text = parts
@@ -84,6 +86,7 @@ def handle_pipedrive_webhook():
         # Look up template content SID
         content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
         if not content_sid:
+            print(f"Unknown template: {template_name}")
             return jsonify({"status": "noop", "error": "Unknown template"}), 200
 
         print("=== WhatsApp Send Debug ===")
