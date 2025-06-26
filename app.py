@@ -150,6 +150,7 @@ def handle_front_webhook():
             print("Missing Twilio credentials. Skipping send.")
             return jsonify({"status": "noop"}), 200    
 
+        print("📣 About to call send_whatsapp_template")
         send_status = send_whatsapp_template(recipient, content_sid, {"1": variable_text})
         return jsonify(send_status), 200
 
