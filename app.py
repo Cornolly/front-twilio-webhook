@@ -60,9 +60,7 @@ def handle_pipedrive_webhook():
 
         if not custom_field_value:
             return jsonify({"status": "noop", "error": "No value in trigger field"}), 200
-
-        if data.get("previous", {}).get("custom_fields", {}).get("cd83bf5536c29ee8f207e865c81fbad299472bfc") is None:
-            return jsonify({"status": "noop", "note": "Field was not updated"}), 200    
+  
 
         # Split the field into template and variable
         parts = custom_field_value.strip().split(" ", 1)
