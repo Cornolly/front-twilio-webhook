@@ -158,6 +158,7 @@ def handle_front_webhook():
         return jsonify({"status": "noop", "error": str(e)}), 200
 
 def send_whatsapp_template(to_number, content_sid, variables):
+    print("➡️ send_whatsapp_template called")
     url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json"
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -169,7 +170,6 @@ def send_whatsapp_template(to_number, content_sid, variables):
     }
 
     print("Sending payload to Twilio:", payload)
-
     response = requests.post(
         url, headers=headers, data=payload, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     )
