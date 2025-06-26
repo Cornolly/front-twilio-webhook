@@ -86,6 +86,14 @@ def handle_pipedrive_webhook():
         if not content_sid:
             return jsonify({"status": "noop", "error": "Unknown template"}), 200
 
+        print("=== WhatsApp Send Debug ===")
+        print(f"Person ID: {person_id}")
+        print(f"Phone: {phone}")
+        print(f"Template Name: {template_name}")
+        print(f"Variable Text: {variable_text}")
+        print(f"Content SID: {content_sid}")
+        print("===========================")
+
         send_status = send_whatsapp_template(phone, content_sid, {"1": variable_text})
         print("Send status:", send_status)
 
