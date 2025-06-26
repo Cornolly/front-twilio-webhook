@@ -101,9 +101,14 @@ def handle_pipedrive_webhook():
         print(f"Content SID: {content_sid}")
         print("===========================")
 
-        print("📣 About to call send_whatsapp_template")
-        send_status = send_whatsapp_template(phone, content_sid, {"1": variable_text})
-        print("Send status:", send_status)
+        print("🔥 All checks passed, preparing to send WhatsApp via Twilio")
+        try:
+            print("📣 About to call send_whatsapp_template")
+            send_status = send_whatsapp_template(phone, content_sid, {"1": variable_text})
+            print("✅ Twilio send complete:", send_status)
+        except Exception as e:
+            print("❌ ERROR calling Twilio send_whatsapp_template:", str(e))
+            return jsonify({"status": "error", "message": "Exception calling Twilio", "details": str(e)}), 200
 
         # ✅ Clear the field to prevent repeat sending
         if send_status.get("status") == "success":
