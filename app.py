@@ -97,6 +97,7 @@ def handle_pipedrive_webhook():
         print(f"Content SID: {content_sid}")
         print("===========================")
 
+        print("📣 About to call send_whatsapp_template")
         send_status = send_whatsapp_template(phone, content_sid, {"1": variable_text})
         print("Send status:", send_status)
 
