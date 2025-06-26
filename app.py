@@ -40,17 +40,29 @@ def handle_pipedrive_webhook():
 
         current = data["current"]
         person_id = data["meta"].get("id")
+
         custom_field_value = (
-            current.get("custom_fields", {})
+            data.get("current", {}).get("custom_fields", {})
             .get("cd83bf5536c29ee8f207e865c81fbad299472bfc", {})
             .get("value")
         )
+
+        # If empty, check if we are dealing with a field *being cleared* (and grab the old value)
+        if not custom_field_value:
+            custom_field_value = (
+                data.get("previous", {}).get("custom_fields", {})
+                .get("cd83bf5536c29ee8f207e865c81fbad299472bfc", {})
+                .get("value")
+            )
 
         if not person_id:
             return jsonify({"status": "noop", "error": "Missing person_id"}), 200
 
         if not custom_field_value:
             return jsonify({"status": "noop", "error": "No value in trigger field"}), 200
+
+        if data.get("previous", {}).get("custom_fields", {}).get("cd83bf5536c29ee8f207e865c81fbad299472bfc") is None:
+            return jsonify({"status": "noop", "note": "Field was not updated"}), 200    
 
         # Split the field into template and variable
         parts = custom_field_value.strip().split(" ", 1)
