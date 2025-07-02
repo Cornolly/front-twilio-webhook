@@ -67,23 +67,21 @@ def handle_pipedrive_webhook():
         results = []
 
         for template_name, field_id in TEMPLATE_FIELD_MAP.items():
-            field_value = current.get("custom_fields", {}).get(field_id, {}).get("value")
+            current_field = current.get("custom_fields", {}).get(field_id, {})
+            previous_field = data.get("previous", {}).get("custom_fields", {}).get(field_id, {})
 
-            # If not in current, check if it was just updated (moved from previous)
-            if not field_value:
-                field_value = (
-                    data.get("previous", {}).get("custom_fields", {})
-                    .get(field_id, {}).get("value")
-                )
+            current_value = current_field.get("value")
+            previous_value = previous_field.get("value")
 
-            if field_value:
-                print(f"📤 Sending template: {template_name} to {phone} with variable: {field_value}")
+            # Only send if the field has a new value or it changed
+            if current_value and current_value != previous_value:
+                print(f"📤 Sending template: {template_name} to {phone} with variable: {current_value}")
                 content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
                 if not content_sid:
                     results.append({"template": template_name, "status": "error", "error": "Unknown content SID"})
                     continue
 
-                send_status = send_whatsapp_template(phone, content_sid, {"1": field_value})
+                send_status = send_whatsapp_template(phone, content_sid, {"1": current_value})
                 results.append({"template": template_name, "status": send_status.get("status")})
 
                 # If successful, clear the field
@@ -93,13 +91,14 @@ def handle_pipedrive_webhook():
                     requests.put(update_url, json=clear_payload)
 
         if not results:
-            return jsonify({"status": "noop", "message": "No fields had values"}), 200
+            return jsonify({"status": "noop", "message": "No fields triggered action"}), 200
 
         return jsonify({"status": "done", "results": results}), 200
 
     except Exception as e:
         print("❌ Exception in PD webhook:", str(e))
         return jsonify({"status": "error", "error": str(e)}), 200
+
 
 
 @app.route("/webhook", methods=["POST"])
