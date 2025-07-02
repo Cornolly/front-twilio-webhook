@@ -80,12 +80,12 @@ def handle_pipedrive_webhook():
             field = custom_fields.get(field_id)
             field_value = field.get("value") if field else None
 
-            # Fallback to previous value if not found
-            if not field_value:
-                previous_field = data.get("previous", {}).get("custom_fields", {}).get(field_id)
-                field_value = previous_field.get("value") if previous_field else None
+            # ✅ Only trigger if current value is not empty and previous value was empty
+            previous_value = (
+                data.get("previous", {}).get("custom_fields", {}).get(field_id, {}).get("value")
+            )
 
-            if field_value:
+            if field_value and not previous_value:
                 print(f"📤 Sending template '{template_name}' to {phone} with variable: {field_value}")
                 content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
 
