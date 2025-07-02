@@ -30,7 +30,7 @@ TEMPLATE_FIELD_MAP = {
     "payment_released": "cd83bf5536c29ee8f207e865c81fbad299472bfc",
     "settlement_received": "7ea7e0624f14fc357ce115cd3a309741aabbb675",
     "24hrs": "981fcfd49cf65cc359f674004e399d89299b1dfd",
-    "Ftt_chase": "d589136563f5f59c2de084c96c44dd92c5890744"
+    "ftt_chase": "d589136563f5f59c2de084c96c44dd92c5890744"
 }
 
 @app.route("/", methods=["GET"])
