@@ -46,7 +46,7 @@ def handle_pipedrive_webhook():
 
         person_data_raw = data.get("data", {})
         person_id = (
-            data.get("meta", {}).get("id") or
+            data.get("meta", {}).get("entity_id") or
             data.get("current", {}).get("id")
         )
 
