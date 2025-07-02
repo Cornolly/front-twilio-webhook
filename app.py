@@ -42,56 +42,56 @@ def verify_webhook():
 def handle_pipedrive_webhook():
     try:
         data = request.get_json()
-        print("Received PD webhook:", data)
+        print("📥 Received PD webhook:", json.dumps(data, indent=2))
 
-        if not data or "current" not in data or "meta" not in data:
-            return jsonify({"status": "noop", "error": "Missing required fields"}), 200
+        person_data_raw = data.get("data") or {}
+        person_id = data.get("meta", {}).get("id")
 
-        current = data.get("data") or data.get("current")  # fallback
-        person_id = data["meta"].get("id")
         if not person_id:
             return jsonify({"status": "noop", "error": "Missing person_id"}), 200
 
-        # Fetch person details
+        # Fetch person to get phone
         person_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
         resp = requests.get(person_url)
-        person_data = resp.json()
+        person_info = resp.json()
 
-        if not person_data.get("data"):
+        if not person_info.get("data"):
             return jsonify({"status": "noop", "error": "Person not found"}), 200
 
-        phone = person_data["data"].get("phone", [{}])[0].get("value", "")
+        phone = person_info["data"].get("phone", [{}])[0].get("value")
         if not phone:
             return jsonify({"status": "noop", "error": "No phone number"}), 200
 
         results = []
+        custom_fields = person_data_raw.get("custom_fields", {})
 
         for template_name, field_id in TEMPLATE_FIELD_MAP.items():
-            current_field = current.get("custom_fields", {}).get(field_id, {})
-            previous_field = data.get("previous", {}).get("custom_fields", {}).get(field_id, {})
+            field = custom_fields.get(field_id)
+            field_value = field.get("value") if field else None
 
-            current_value = current_field.get("value")
-            previous_value = previous_field.get("value")
+            # Fallback to previous if needed
+            if not field_value:
+                previous_field = data.get("previous", {}).get("custom_fields", {}).get(field_id)
+                field_value = previous_field.get("value") if previous_field else None
 
-            # Only send if the field has a new value or it changed
-            if current_value and current_value != previous_value:
-                print(f"📤 Sending template: {template_name} to {phone} with variable: {current_value}")
+            if field_value:
+                print(f"📤 Sending template '{template_name}' to {phone} with variable: {field_value}")
                 content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
+
                 if not content_sid:
-                    results.append({"template": template_name, "status": "error", "error": "Unknown content SID"})
+                    results.append({"template": template_name, "status": "error", "error": "Unknown ContentSid"})
                     continue
 
-                send_status = send_whatsapp_template(phone, content_sid, {"1": current_value})
+                send_status = send_whatsapp_template(phone, content_sid, {"1": field_value})
                 results.append({"template": template_name, "status": send_status.get("status")})
 
-                # If successful, clear the field
                 if send_status.get("status") == "success":
-                    update_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
+                    clear_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
                     clear_payload = {field_id: ""}
-                    requests.put(update_url, json=clear_payload)
+                    requests.put(clear_url, json=clear_payload)
 
         if not results:
-            return jsonify({"status": "noop", "message": "No fields triggered action"}), 200
+            return jsonify({"status": "noop", "message": "No relevant fields found"}), 200
 
         return jsonify({"status": "done", "results": results}), 200
 
