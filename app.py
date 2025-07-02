@@ -20,13 +20,15 @@ print("TWILIO_WHATSAPP_FROM:", TWILIO_WHATSAPP_FROM)
 # Template-to-ContentSid mapping
 TEMPLATE_CONTENT_MAP = {
     "payment_released": "HX6b4482f404e6b063984df49dc3b3e69c",
-    "settlement_received": "HX706c585bc08250b45418ae5c6da063a9" 
+    "settlement_received": "HX706c585bc08250b45418ae5c6da063a9"
+    "24hrs": "HXbafe219694047b3d258a789df58da66d"
 }
 
 # Maps template name to Pipedrive custom field ID
 TEMPLATE_FIELD_MAP = {
     "payment_released": "cd83bf5536c29ee8f207e865c81fbad299472bfc",
     "settlement_received": "7ea7e0624f14fc357ce115cd3a309741aabbb675"
+    "24hrs": "981fcfd49cf65cc359f674004e399d89299b1dfd"
 }
 
 @app.route("/", methods=["GET"])
@@ -98,7 +100,8 @@ def handle_pipedrive_webhook():
                     results.append({"template": template_name, "status": "error", "error": "Unknown ContentSid"})
                     continue
 
-                send_status = send_whatsapp_template(phone, content_sid, {"1": field_value})
+                variables = {} if template_name == "24hrs" else {"1": field_value}
+                send_status = send_whatsapp_template(phone, content_sid, variables)
                 results.append({"template": template_name, "status": send_status.get("status")})
 
                 # Clear the field if successful
