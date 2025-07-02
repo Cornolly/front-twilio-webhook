@@ -199,5 +199,19 @@ def send_whatsapp_template(to_number, content_sid, variables):
     else:
         return {"status": "error", "details": response.text}
 
+@app.route("/test-send", methods=["POST"])
+def test_send():
+    phone = request.json.get("phone")
+    template_name = request.json.get("template")
+    variable_text = request.json.get("variable")
+
+    content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
+    if not content_sid:
+        return jsonify({"status": "error", "msg": "Unknown template"}), 400
+
+    result = send_whatsapp_template(phone, content_sid, {"1": variable_text})
+    return jsonify(result), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True)
