@@ -23,6 +23,12 @@ TEMPLATE_CONTENT_MAP = {
     "settlement_received": "HX706c585bc08250b45418ae5c6da063a9" 
 }
 
+# Maps template name to Pipedrive custom field ID
+TEMPLATE_FIELD_MAP = {
+    "payment_released": "cd83bf5536c29ee8f207e865c81fbad299472bfc",
+    "settlement_received": "your_field_id_for_settlement_received"
+}
+
 @app.route("/", methods=["GET"])
 def home():
     return "Webhook server is running", 200
@@ -38,44 +44,15 @@ def handle_pipedrive_webhook():
         data = request.get_json()
         print("Received PD webhook:", data)
 
-        # Safety checks
         if not data or "current" not in data or "meta" not in data:
-            return jsonify({"status": "noop"}), 200
+            return jsonify({"status": "noop", "error": "Missing required fields"}), 200
 
         current = data["current"]
         person_id = data["meta"].get("id")
-
-        custom_field_value = (
-            data.get("current", {}).get("custom_fields", {})
-            .get("cd83bf5536c29ee8f207e865c81fbad299472bfc", {})
-            .get("value")
-        )
-
-        # If empty, check if we are dealing with a field *being cleared* (and grab the old value)
-        if not custom_field_value:
-            custom_field_value = (
-                data.get("previous", {}).get("custom_fields", {})
-                .get("cd83bf5536c29ee8f207e865c81fbad299472bfc", {})
-                .get("value")
-            )
-
         if not person_id:
             return jsonify({"status": "noop", "error": "Missing person_id"}), 200
 
-        if not custom_field_value:
-            return jsonify({"status": "noop", "error": "No value in trigger field"}), 200
-
-        print(f"Raw custom field value: '{custom_field_value}'")
-
-        # Split the field into template and variable
-        parts = custom_field_value.strip().split(" ", 1)
-        if len(parts) != 2:
-            print(f"Invalid format after split: {parts}")
-            return jsonify({"status": "noop", "error": "Invalid format"}), 200
-
-        template_name, variable_text = parts
-
-        # Get phone number for this person
+        # Fetch person details
         person_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
         resp = requests.get(person_url)
         person_data = resp.json()
@@ -87,39 +64,43 @@ def handle_pipedrive_webhook():
         if not phone:
             return jsonify({"status": "noop", "error": "No phone number"}), 200
 
-        # Look up template content SID
-        content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
-        if not content_sid:
-            print(f"Unknown template: {template_name}")
-            return jsonify({"status": "noop", "error": "Unknown template"}), 200
+        results = []
 
-        print("=== WhatsApp Send Debug ===")
-        print(f"Person ID: {person_id}")
-        print(f"Phone: {phone}")
-        print(f"Template Name: {template_name}")
-        print(f"Variable Text: {variable_text}")
-        print(f"Content SID: {content_sid}")
-        print("===========================")
+        for template_name, field_id in TEMPLATE_FIELD_MAP.items():
+            field_value = current.get("custom_fields", {}).get(field_id, {}).get("value")
 
-        print("🔥 All checks passed, preparing to send WhatsApp via Twilio")
-        try:
-            print("📣 About to call send_whatsapp_template")
-            send_status = send_whatsapp_template(phone, content_sid, {"1": variable_text})
-            print("✅ Twilio send complete:", send_status)
-        except Exception as e:
-            print("❌ ERROR calling Twilio send_whatsapp_template:", str(e))
-            return jsonify({"status": "error", "message": "Exception calling Twilio", "details": str(e)}), 200
+            # If not in current, check if it was just updated (moved from previous)
+            if not field_value:
+                field_value = (
+                    data.get("previous", {}).get("custom_fields", {})
+                    .get(field_id, {}).get("value")
+                )
 
-        # ✅ Clear the field to prevent repeat sending
-        if send_status.get("status") == "success":
-            update_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
-            requests.put(update_url, json={ "cd83bf5536c29ee8f207e865c81fbad299472bfc": "" })
+            if field_value:
+                print(f"📤 Sending template: {template_name} to {phone} with variable: {field_value}")
+                content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
+                if not content_sid:
+                    results.append({"template": template_name, "status": "error", "error": "Unknown content SID"})
+                    continue
 
-        return jsonify(send_status), 200
+                send_status = send_whatsapp_template(phone, content_sid, {"1": field_value})
+                results.append({"template": template_name, "status": send_status.get("status")})
+
+                # If successful, clear the field
+                if send_status.get("status") == "success":
+                    update_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
+                    clear_payload = {field_id: ""}
+                    requests.put(update_url, json=clear_payload)
+
+        if not results:
+            return jsonify({"status": "noop", "message": "No fields had values"}), 200
+
+        return jsonify({"status": "done", "results": results}), 200
 
     except Exception as e:
-        print("Exception in Pipedrive webhook:", str(e))
-        return jsonify({"status": "noop", "error": str(e)}), 200
+        print("❌ Exception in PD webhook:", str(e))
+        return jsonify({"status": "error", "error": str(e)}), 200
+
 
 @app.route("/webhook", methods=["POST"])
 def handle_twilio_webhook():
