@@ -47,7 +47,7 @@ def handle_pipedrive_webhook():
         if not data or "current" not in data or "meta" not in data:
             return jsonify({"status": "noop", "error": "Missing required fields"}), 200
 
-        current = data["current"]
+        current = data.get("data") or data.get("current")  # fallback
         person_id = data["meta"].get("id")
         if not person_id:
             return jsonify({"status": "noop", "error": "Missing person_id"}), 200
