@@ -47,7 +47,10 @@ def handle_pipedrive_webhook():
         print("📥 Received PD webhook:", json.dumps(data, indent=2))
 
         person_data_raw = data.get("data", {})
-        person_id = data.get("meta", {}).get("id")
+        person_id = (
+            data.get("meta", {}).get("id") or
+            data.get("current", {}).get("id")
+        )
 
         if not person_id:
             print("⚠️ No person_id in webhook meta")
