@@ -26,7 +26,7 @@ TEMPLATE_CONTENT_MAP = {
 # Maps template name to Pipedrive custom field ID
 TEMPLATE_FIELD_MAP = {
     "payment_released": "cd83bf5536c29ee8f207e865c81fbad299472bfc",
-    "settlement_received": "your_field_id_for_settlement_received"
+    "settlement_received": "7ea7e0624f14fc357ce115cd3a309741aabbb675"
 }
 
 @app.route("/", methods=["GET"])
