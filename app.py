@@ -38,57 +38,68 @@ def verify_webhook():
     return jsonify({"status": "ok"}), 200
 
 
-@app.route("/pd-webhook", methods=["POST"])
+
+
+@app.route("/pipedrive-webhook", methods=["POST"])
 def handle_pipedrive_webhook():
     try:
         data = request.get_json()
         print("📥 Received PD webhook:", json.dumps(data, indent=2))
 
-        person_data_raw = data.get("data") or {}
+        person_data_raw = data.get("data", {})
         person_id = data.get("meta", {}).get("id")
 
         if not person_id:
+            print("⚠️ No person_id in webhook meta")
             return jsonify({"status": "noop", "error": "Missing person_id"}), 200
 
-        # Fetch person to get phone
+        # Get person phone number
         person_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
         resp = requests.get(person_url)
         person_info = resp.json()
 
         if not person_info.get("data"):
+            print("⚠️ Person not found in Pipedrive API")
             return jsonify({"status": "noop", "error": "Person not found"}), 200
 
         phone = person_info["data"].get("phone", [{}])[0].get("value")
         if not phone:
+            print("⚠️ No phone number found for person")
             return jsonify({"status": "noop", "error": "No phone number"}), 200
 
-        results = []
         custom_fields = person_data_raw.get("custom_fields", {})
+        previous_fields = data.get("previous", {}).get("custom_fields", {})
+        results = []
 
         for template_name, field_id in TEMPLATE_FIELD_MAP.items():
-            field = custom_fields.get(field_id)
-            field_value = field.get("value") if field else None
+            field_data = custom_fields.get(field_id)
+            field_value = field_data.get("value") if isinstance(field_data, dict) else field_data
 
-            # Fallback to previous if needed
+            # Use previous if needed (optional fallback)
             if not field_value:
-                previous_field = data.get("previous", {}).get("custom_fields", {}).get(field_id)
-                field_value = previous_field.get("value") if previous_field else None
+                previous_data = previous_fields.get(field_id)
+                field_value = previous_data.get("value") if isinstance(previous_data, dict) else previous_data
 
             if field_value:
                 print(f"📤 Sending template '{template_name}' to {phone} with variable: {field_value}")
                 content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
 
                 if not content_sid:
+                    print(f"❌ No ContentSid found for template: {template_name}")
                     results.append({"template": template_name, "status": "error", "error": "Unknown ContentSid"})
                     continue
 
+                # Send WhatsApp message
                 send_status = send_whatsapp_template(phone, content_sid, {"1": field_value})
+                print("📬 Send status:", send_status)
                 results.append({"template": template_name, "status": send_status.get("status")})
 
+                # Clear the field if sent successfully
                 if send_status.get("status") == "success":
                     clear_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
                     clear_payload = {field_id: ""}
-                    requests.put(clear_url, json=clear_payload)
+                    clear_resp = requests.put(clear_url, json=clear_payload)
+                    print(f"🧹 Cleared field {field_id}: {clear_resp.status_code}")
 
         if not results:
             return jsonify({"status": "noop", "message": "No relevant fields found"}), 200
