@@ -33,7 +33,7 @@ TEMPLATE_FIELD_MAP = {
     "settlement_received": "7ea7e0624f14fc357ce115cd3a309741aabbb675",
     "24hrs": "981fcfd49cf65cc359f674004e399d89299b1dfd",
     "ftt_chase": "d589136563f5f59c2de084c96c44dd92c5890744",
-    "payment_account": "ee1b54060e98b53bdd2e08a3248afe7e198c2227"
+    "payment_account": "ee1b54060e98b53bdd2e08a3248afe7e198c2227",
     "payment_which": "2fc9cb4ff0a04b9fec4aae5c55e4e4b39b63f7c2"
 }
 
