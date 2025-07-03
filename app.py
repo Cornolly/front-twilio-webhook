@@ -101,13 +101,19 @@ def handle_pipedrive_webhook():
                     previous_value = prev_field.get("value")
 
 
+            print(f"DEBUG: template_name = {template_name}")
+            print(f"DEBUG: field_value = {field_value}")
+            print(f"DEBUG: previous_value = {previous_value}")
+            
             if field_value and not previous_value:
+                print("DEBUG: Entered field_value check")
                 print(f"📤 Sending template '{template_name}' to {phone} with variable: {field_value}")
                 content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
 
                 if not content_sid:
                     results.append({"template": template_name, "status": "error", "error": "Unknown ContentSid"})
                     continue
+    
 
                 # ✅ Variable handling logic per template
                 if template_name == "24hrs":
