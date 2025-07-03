@@ -187,14 +187,12 @@ def handle_pipedrive_webhook():
         print("❌ Exception in PD webhook:", str(e))
         return jsonify({"status": "error", "error": str(e)}), 200
 
-
 @app.route("/webhook", methods=["POST"])
 def handle_twilio_webhook():
     print("Received Twilio webhook!")
     data = request.json or request.form
     print("Twilio data:", data)
     return jsonify({"status": "received"}), 200
-
 
 @app.route("/front-webhook", methods=["POST"])
 def handle_front_webhook():
