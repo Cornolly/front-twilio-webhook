@@ -118,7 +118,7 @@ def handle_pipedrive_webhook():
                         "1": parts[0],
                         "2": parts[1] if len(parts) > 1 else ""
                     }
-                elif template_name == "quote":
+                elif template_name.lower() == "quote":
                     # Special case: send to quote endpoint instead of Twilio
                     parts = field_value.strip().split(" ", 2)
                     if len(parts) != 4:
