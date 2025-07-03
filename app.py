@@ -118,7 +118,7 @@ def handle_pipedrive_webhook():
                         "1": parts[0],
                         "2": parts[1] if len(parts) > 1 else ""
                     }
-                elif template_name == "Quote":
+                elif template_name == "quote":
                     # Special case: send to quote endpoint instead of Twilio
                     parts = field_value.strip().split(" ", 3)
                     if len(parts) != 4:
@@ -154,6 +154,13 @@ def handle_pipedrive_webhook():
                     )
 
                     print("📩 Quote API response:", quote_response.status_code, quote_response.text)
+
+                    # ✅ Clear the Pipedrive field after quote send, even if no Twilio message
+                    clear_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
+                    clear_payload = {field_id: ""}
+                    clear_resp = requests.put(clear_url, json=clear_payload)
+                    print(f"🧹 Cleared field {field_id}: {clear_resp.status_code}")
+
                     results.append({"template": template_name, "status": "sent_to_quote_api", "response": quote_response.text})
                     continue  # Skip Twilio send for Quote
                 
