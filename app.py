@@ -12,6 +12,7 @@ app = Flask(__name__)
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM")
+QUOTE_API_KEY = os.getenv("QUOTE_API_KEY")
 
 print("TWILIO_ACCOUNT_SID:", TWILIO_ACCOUNT_SID)
 print("TWILIO_AUTH_TOKEN:", TWILIO_AUTH_TOKEN)
@@ -34,7 +35,8 @@ TEMPLATE_FIELD_MAP = {
     "24hrs": "981fcfd49cf65cc359f674004e399d89299b1dfd",
     "ftt_chase": "d589136563f5f59c2de084c96c44dd92c5890744",
     "payment_account": "ee1b54060e98b53bdd2e08a3248afe7e198c2227",
-    "payment_which": "2fc9cb4ff0a04b9fec4aae5c55e4e4b39b63f7c2"
+    "payment_which": "2fc9cb4ff0a04b9fec4aae5c55e4e4b39b63f7c2",
+    "quote": "27ac627ce1339c99142bbe05d5ce4a11003c66c1"
 }
 
 @app.route("/", methods=["GET"])
@@ -111,11 +113,50 @@ def handle_pipedrive_webhook():
                     variables = {}
                 elif template_name in ["payment_account", "payment_which"]:
                     # Split into two variables by the first space
-                    parts = field_value.split(" ", 1)
+                    parts = field_value.strip().split(" ", 1)
                     variables = {
                         "1": parts[0],
                         "2": parts[1] if len(parts) > 1 else ""
                     }
+                elif template_name == "Quote":
+                    # Special case: send to quote endpoint instead of Twilio
+                    parts = field_value.strip().split(" ", 3)
+                    if len(parts) != 4:
+                        print(f"❌ Invalid Quote field format: {field_value}")
+                        results.append({"template": template_name, "status": "error", "error": "Invalid format"})
+                        continue  # Skip this iteration
+
+                    pair = parts[0]
+                    direction = parts[1]
+                    amount = parts[2].replace(",", "").replace("£", "")  # Strip commas or currency symbols if needed
+                    try:
+                        amount_value = float(amount.replace(",", ""))
+                    except ValueError:
+                        print(f"❌ Invalid amount in Quote field: {amount}")
+                        results.append({"template": template_name, "status": "error", "error": "Invalid amount"})
+                        continue
+
+                    quote_payload = {
+                        "phone": phone,
+                        "pair": pair,
+                        "direction": direction,
+                        "amount": amount_value
+                    }
+
+                    print(f"🚀 Sending Quote payload: {quote_payload}")
+                    quote_response = requests.post(
+                        "https://quote-production-f1f1.up.railway.app/send_quote",
+                        headers={
+                            "Content-Type": "application/json",
+                            "X-API-KEY": os.getenv("QUOTE_API_KEY")
+                        },
+                        json=quote_payload
+                    )
+
+                    print("📩 Quote API response:", quote_response.status_code, quote_response.text)
+                    results.append({"template": template_name, "status": "sent_to_quote_api", "response": quote_response.text})
+                    continue  # Skip Twilio send for Quote
+                
                 else:
                     variables = {"1": field_value}
 
