@@ -123,6 +123,7 @@ def handle_pipedrive_webhook():
                     print("DEBUG: Entered quote template handler")
                     # Special case: send to quote endpoint instead of Twilio
                     parts = field_value.strip().split(" ", 2)
+                    print(f"DEBUG: parts = {parts}")  # Shows split result
                     if len(parts) != 3:
                         print(f"❌ Invalid Quote field format: {field_value}")
                         results.append({"template": template_name, "status": "error", "error": "Invalid format"})
