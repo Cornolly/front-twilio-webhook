@@ -87,6 +87,7 @@ def handle_pipedrive_webhook():
         custom_fields = person_data_raw.get("custom_fields", {})
 
         for template_name, field_id in TEMPLATE_FIELD_MAP.items():
+            print(f"DEBUG: template_name = {template_name}")  # 👈 This one here
             field = custom_fields.get(field_id)
             field_value = field.get("value") if field else None
 
@@ -119,6 +120,7 @@ def handle_pipedrive_webhook():
                         "2": parts[1] if len(parts) > 1 else ""
                     }
                 elif template_name.lower() == "quote":
+                    print("DEBUG: Entered quote template handler")
                     # Special case: send to quote endpoint instead of Twilio
                     parts = field_value.strip().split(" ", 2)
                     if len(parts) != 3:
