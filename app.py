@@ -144,6 +144,7 @@ def handle_pipedrive_webhook():
                     }
 
                     print(f"🚀 Sending Quote payload: {quote_payload}")
+                    print("Sending Quote API request with API key:", repr(os.getenv("SEND_QUOTE_API_KEY")))
                     quote_response = requests.post(
                         "https://quote-production-f1f1.up.railway.app/send_quote",
                         headers={
