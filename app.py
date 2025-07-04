@@ -181,20 +181,21 @@ def handle_pipedrive_webhook():
 
                 send_status = send_whatsapp_template(phone, content_sid, variables)
                 results.append({"template": template_name, "status": send_status.get("status")})
-                
-                # ✅ Log Activity in Pipedrive
-                activity_payload = {
-                    "subject": f"WhatsApp Message Sent: {template_name}",
-                    "done": 1,
-                    "person_id": person_id,
-                    "note": f"Variables: {json.dumps(variables)}"
-                }
-                activity_url = f"https://api.pipedrive.com/v1/activities?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
-                activity_resp = requests.post(activity_url, json=activity_payload)
-                print("📌 Activity logged:", activity_resp.status_code, activity_resp.text)
 
                 # Clear the field if successful
                 if send_status.get("status") == "success":
+                    # ✅ Log Activity in Pipedrive
+                    activity_payload = {
+                        "subject": f"WhatsApp Message Sent: {template_name}",
+                        "done": 1,
+                        "person_id": person_id,
+                        "note": f"Variables: {json.dumps(variables)}"
+                    }
+                    activity_url = f"https://api.pipedrive.com/v1/activities?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
+                    activity_resp = requests.post(activity_url, json=activity_payload)
+                    print("📌 Activity logged:", activity_resp.status_code, activity_resp.text)
+                    
+                    # Clear the field if successful
                     clear_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
                     clear_payload = {field_id: ""}
                     clear_resp = requests.put(clear_url, json=clear_payload)
