@@ -186,12 +186,17 @@ def handle_pipedrive_webhook():
 
                 # Clear the field if successful
                 if send_status.get("status") == "success":
+                    # Compose the note with variables and full message
+                    note_text = (
+                        f"Variables: {json.dumps(variables, indent=2)}\n\n"
+                        f"Full Message:\n{field_value.strip()}"
+                    )
                     # ✅ Log Activity in Pipedrive
                     activity_payload = {
                         "subject": f"WhatsApp Message Sent: {template_name}",
                         "done": 1,
                         "person_id": person_id,
-                        "note": f"Variables: {json.dumps(variables)}",
+                        "note": note_text,
                         "type": "whatsapp"
                     }
                     activity_url = f"https://api.pipedrive.com/v1/activities?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
