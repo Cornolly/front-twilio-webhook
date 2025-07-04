@@ -189,7 +189,8 @@ def handle_pipedrive_webhook():
                         "subject": f"WhatsApp Message Sent: {template_name}",
                         "done": 1,
                         "person_id": person_id,
-                        "note": f"Variables: {json.dumps(variables)}"
+                        "note": f"Variables: {json.dumps(variables)}",
+                        "type": "whatsapp"
                     }
                     activity_url = f"https://api.pipedrive.com/v1/activities?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
                     activity_resp = requests.post(activity_url, json=activity_payload)
