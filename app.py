@@ -228,6 +228,10 @@ def handle_twilio_webhook():
     print("Twilio data:", data)
     return jsonify({"status": "received"}), 200
 
+def sanitize_number(number):
+    # Remove invisible characters and spaces, keep digits and plus sign
+    return re.sub(r'[^\d+]', '', number)    
+
 @app.route("/front-webhook", methods=["POST"])
 def handle_front_webhook():
     try:
@@ -275,11 +279,12 @@ def handle_front_webhook():
 
 def send_whatsapp_template(to_number, content_sid, variables):
     print("➡️ send_whatsapp_template called")
+    sanitized_number = sanitize_number(to_number)
     url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json"
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     payload = {
-        "To": f"whatsapp:{to_number}",
+        "To": f"whatsapp:{sanitized_number}",
         "From": f"whatsapp:{TWILIO_WHATSAPP_FROM}",
         "ContentSid": content_sid,
         "ContentVariables": json.dumps(variables)
