@@ -28,7 +28,7 @@ TEMPLATE_CONTENT_MAP = {
     "payment_which": "HX6434eec56092adba95513f65d82bc26d",
     "gb_sar": "HX046f744c9a57569d809d7c1954b867ef",
     "colleagues": "HXcf671083796da95467bb1b5b84b0def0",
-    "activated": "HX8e59c4a8a400a00cd8365c019f7a6efe"
+    "activated": "HX3c3ffc8ee57ffaf52d5fc1b5333129d3"
 }
 
 # Maps template name to Pipedrive custom field ID
