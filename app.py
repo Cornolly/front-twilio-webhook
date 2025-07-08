@@ -27,7 +27,8 @@ TEMPLATE_CONTENT_MAP = {
     "payment_account": "HX373b8d1366c112e7001acffe88f99056",
     "payment_which": "HX6434eec56092adba95513f65d82bc26d",
     "gb_sar": "HX046f744c9a57569d809d7c1954b867ef",
-    "colleagues": "HXcf671083796da95467bb1b5b84b0def0"
+    "colleagues": "HXcf671083796da95467bb1b5b84b0def0",
+    "activated": "HX8e59c4a8a400a00cd8365c019f7a6efe"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -40,7 +41,8 @@ TEMPLATE_FIELD_MAP = {
     "payment_which": "2fc9cb4ff0a04b9fec4aae5c55e4e4b39b63f7c2",
     "quote": "27ac627ce1339c99142bbe05d5ce4a11003c66c1",
     "gb_sar": "f193b896c739db7c7f99788dd9acf66beba21122",
-    "colleagues": "afda66ec61e5a2032bf3869d7acb24ff32655fda"
+    "colleagues": "afda66ec61e5a2032bf3869d7acb24ff32655fda",
+    "activated": "d7fee5e8a8c5d835ff176ea06df6876f46106ede"
 }
 
 @app.route("/", methods=["GET"])
