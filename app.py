@@ -234,14 +234,12 @@ def handle_twilio_webhook():
     return jsonify({"status": "received"}), 200
 
 def sanitize_number(number):
-    # Strip leading/trailing whitespace
     number = number.strip()
-
-    # Keep '+' if it’s the first character, then digits only
     if number.startswith('+'):
         return '+' + re.sub(r'\D', '', number[1:])
     else:
-        return re.sub(r'\D', '', number)    
+        # If the number begins without +, add it:
+        return '+' + re.sub(r'\D', '', number) 
 
 @app.route("/front-webhook", methods=["POST"])
 def handle_front_webhook():
