@@ -32,7 +32,7 @@ TEMPLATE_CONTENT_MAP = {
     "activated": "HX3c3ffc8ee57ffaf52d5fc1b5333129d3",
     "sar_scio": "HX04e292959d0113b0860b44308a83e5d1",
     "head_of_trading": "HX1ea7ef8a998d1ede17f89b2bfdac384e",
-    "rate_amount_quote": "HX97fb4c86eff2c840cf2362bc35cf859b"
+    "quote_followup": "HX7783b35f18ce38d7c87c6aa34c5375e8"
 }
 
 # Maps template name to Pipedrive custom field ID
