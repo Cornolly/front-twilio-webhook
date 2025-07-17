@@ -31,7 +31,8 @@ TEMPLATE_CONTENT_MAP = {
     "colleagues": "HXcf671083796da95467bb1b5b84b0def0",
     "activated": "HX3c3ffc8ee57ffaf52d5fc1b5333129d3",
     "sar_scio": "HX04e292959d0113b0860b44308a83e5d1",
-    "head_of_trading": "HX1ea7ef8a998d1ede17f89b2bfdac384e"
+    "head_of_trading": "HX1ea7ef8a998d1ede17f89b2bfdac384e",
+    "rate_amount_quote": "HX97fb4c86eff2c840cf2362bc35cf859b"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -47,7 +48,8 @@ TEMPLATE_FIELD_MAP = {
     "colleagues": "afda66ec61e5a2032bf3869d7acb24ff32655fda",
     "activated": "d7fee5e8a8c5d835ff176ea06df6876f46106ede",
     "sar_scio": "a556f699bda90c9e004281d81bb8d87f9edb242d",
-    "head_of_trading": "8717e7292d0ea7ebca11632451d4db47d21bab02"
+    "head_of_trading": "8717e7292d0ea7ebca11632451d4db47d21bab02",
+    "quote_followup": "dfa936e60f48aae47fe4fc277052613b4d571434"
 }
 
 @app.route("/", methods=["GET"])
