@@ -64,7 +64,6 @@ def home():
 def verify_webhook():
     return jsonify({"status": "ok"}), 200
 
-
 @app.route("/pipedrive-webhook", methods=["POST"])
 def handle_pipedrive_webhook():
     try:
