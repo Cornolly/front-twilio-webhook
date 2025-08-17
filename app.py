@@ -33,7 +33,8 @@ TEMPLATE_CONTENT_MAP = {
     "sar_scio": "HX04e292959d0113b0860b44308a83e5d1",
     "head_of_trading": "HX1ea7ef8a998d1ede17f89b2bfdac384e",
     "quote_followup": "HX7783b35f18ce38d7c87c6aa34c5375e8",
-    "market_update_ftt": "HX765872487eed72459937b3e85fd4d549"
+    "market_update_ftt": "HX765872487eed72459937b3e85fd4d549",
+    "quote_amount": "HX4e63c9c8e2d3234fd6b99d3ea1a14f45"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -51,7 +52,8 @@ TEMPLATE_FIELD_MAP = {
     "sar_scio": "a556f699bda90c9e004281d81bb8d87f9edb242d",
     "head_of_trading": "8717e7292d0ea7ebca11632451d4db47d21bab02",
     "quote_followup": "dfa936e60f48aae47fe4fc277052613b4d571434",
-    "market_update_ftt": "71abec0fdc5e9e691c7332a95b4bad3b72559371"
+    "market_update_ftt": "71abec0fdc5e9e691c7332a95b4bad3b72559371",
+    "quote_amount": "a322fbaee9c8c63ddee6f733873f4ca8204233fb"
 }
 
 @app.route("/", methods=["GET"])
@@ -133,7 +135,7 @@ def handle_pipedrive_webhook():
                 # ✅ Variable handling logic per template
                 if template_name == "24hrs":
                     variables = {}
-                elif template_name in ["payment_account", "payment_which"]:
+                elif template_name in ["payment_account", "payment_which", "quote_amount"]:
                     # Split into two variables by the first space
                     parts = field_value.strip().split(" ", 1)
                     variables = {
