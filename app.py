@@ -131,7 +131,6 @@ def handle_pipedrive_webhook():
                     results.append({"template": template_name, "status": "error", "error": "Unknown ContentSid"})
                     continue
     
-
                 # ✅ Variable handling logic per template
                 if template_name == "24hrs":
                     variables = {}
