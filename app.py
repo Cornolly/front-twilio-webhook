@@ -5,6 +5,8 @@ import json
 from dotenv import load_dotenv
 import re
 
+DEBUG_MODE = os.getenv("DEBUG_LOGGING", "false").lower() == "true"
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -56,6 +58,10 @@ TEMPLATE_FIELD_MAP = {
     "quote_amount": "a322fbaee9c8c63ddee6f733873f4ca8204233fb"
 }
 
+def debug_print(*args, **kwargs):
+    if DEBUG_MODE:
+        print(*args, **kwargs)
+
 @app.route("/", methods=["GET"])
 def home():
     return "Webhook server is running", 200
@@ -68,7 +74,7 @@ def verify_webhook():
 def handle_pipedrive_webhook():
     try:
         data = request.get_json()
-        print("📥 Received PD webhook:", json.dumps(data, indent=2))
+        #print("📥 Received PD webhook:", json.dumps(data, indent=2))
 
         person_data_raw = data.get("data", {})
         person_id = (
@@ -85,7 +91,7 @@ def handle_pipedrive_webhook():
         resp = requests.get(person_url)
         person_info = resp.json()
 
-        print("📦 Full Pipedrive API response:", json.dumps(person_info, indent=2))
+        #print("📦 Full Pipedrive API response:", json.dumps(person_info, indent=2))
 
         person_data = person_info.get("data")
         if not person_data:
@@ -103,7 +109,6 @@ def handle_pipedrive_webhook():
         custom_fields = person_data_raw.get("custom_fields", {})
 
         for template_name, field_id in TEMPLATE_FIELD_MAP.items():
-            print(f"DEBUG: template_name = {template_name}")  # 👈 This one here
             field = custom_fields.get(field_id)
             field_value = field.get("value") if field else None
 
@@ -115,15 +120,9 @@ def handle_pipedrive_webhook():
                 prev_field = previous_fields.get(field_id)
                 if prev_field and isinstance(prev_field, dict):
                     previous_value = prev_field.get("value")
-
-
-            print(f"DEBUG: template_name = {template_name}")
-            print(f"DEBUG: field_value = {field_value}")
-            print(f"DEBUG: previous_value = {previous_value}")
             
             if field_value and not previous_value:
-                print("DEBUG: Entered field_value check")
-                print(f"📤 Sending template '{template_name}' to {phone} with variable: {field_value}")
+                print(f"📤 {template_name} → {phone}")
                 content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
 
                 if not content_sid:
@@ -291,7 +290,6 @@ def handle_front_webhook():
         return jsonify({"status": "noop", "error": str(e)}), 200
 
 def send_whatsapp_template(to_number, content_sid, variables):
-    print("➡️ send_whatsapp_template called")
     sanitized_number = sanitize_number(to_number)
     url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json"
 
@@ -302,14 +300,13 @@ def send_whatsapp_template(to_number, content_sid, variables):
         "ContentSid": content_sid,
         "ContentVariables": json.dumps(variables)
     }
-
-    print("Sending payload to Twilio:", payload)
+    
     response = requests.post(
         url, headers=headers, data=payload, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     )
 
-    print("Twilio response code:", response.status_code)
-    print("Twilio response text:", response.text)
+    # Single line result instead of multiple prints
+    print(f"Twilio: {response.status_code}")
 
     if response.status_code == 201:
         return {"status": "success"}
