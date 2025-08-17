@@ -21,6 +21,16 @@ print("TWILIO_ACCOUNT_SID:", TWILIO_ACCOUNT_SID)
 print("TWILIO_AUTH_TOKEN:", TWILIO_AUTH_TOKEN)
 print("TWILIO_WHATSAPP_FROM:", TWILIO_WHATSAPP_FROM)
 
+# Check for required environment variables
+required_vars = ["PIPEDRIVE_API_KEY", "SEND_QUOTE_API_KEY"]
+missing_vars = [var for var in required_vars if not os.getenv(var)]
+if missing_vars:
+    print(f"⚠️ Missing required environment variables: {missing_vars}")
+else:
+    print("✅ All required environment variables are set")
+
+print("🚀 Application initialization complete")
+
 # Template-to-ContentSid mapping
 TEMPLATE_CONTENT_MAP = {
     "payment_released": "HX6b4482f404e6b063984df49dc3b3e69c",
@@ -58,13 +68,19 @@ TEMPLATE_FIELD_MAP = {
     "quote_amount": "a322fbaee9c8c63ddee6f733873f4ca8204233fb"
 }
 
+@app.route("/", methods=["GET"])
+def home():
+    print("Health check received")  # Add this line
+    return "Webhook server is running", 200
+
+@app.route("/health", methods=["GET"])  # Add this route
+def health():
+    print("Health endpoint hit")
+    return jsonify({"status": "healthy"}), 200
+
 def debug_print(*args, **kwargs):
     if DEBUG_MODE:
         print(*args, **kwargs)
-
-@app.route("/", methods=["GET"])
-def home():
-    return "Webhook server is running", 200
 
 @app.route("/front-webhook", methods=["GET"])
 def verify_webhook():
@@ -126,7 +142,7 @@ def handle_pipedrive_webhook():
                 content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
 
                 if not content_sid:
-                    results.append({"template": template_name, "status": "error", "error": "Unknown ContentSid"})
+                    results.append({"template": template_name, "status": "sent_to_quote_api", "response_code": quote_response.status_code})
                     continue
     
                 # ✅ Variable handling logic per template
@@ -140,10 +156,8 @@ def handle_pipedrive_webhook():
                         "2": parts[1] if len(parts) > 1 else ""
                     }
                 elif template_name.lower() == "quote":
-                    print("DEBUG: Entered quote template handler")
                     # Special case: send to quote endpoint instead of Twilio
                     parts = field_value.strip().split(" ", 2)
-                    print(f"DEBUG: parts = {parts}")  # Shows split result
                     if len(parts) != 3:
                         print(f"❌ Invalid Quote field format: {field_value}")
                         results.append({"template": template_name, "status": "error", "error": "Invalid format"})
@@ -166,8 +180,6 @@ def handle_pipedrive_webhook():
                         "amount": amount_value
                     }
 
-                    print(f"🚀 Sending Quote payload: {quote_payload}")
-                    print("Sending Quote API request with API key:", repr(os.getenv("SEND_QUOTE_API_KEY")))
                     quote_response = requests.post(
                         "https://quote-production-f1f1.up.railway.app/send_quote",
                         headers={
@@ -177,7 +189,7 @@ def handle_pipedrive_webhook():
                         json=quote_payload
                     )
 
-                    print("📩 Quote API response:", quote_response.status_code, quote_response.text)
+                    print(f"Quote API: {quote_response.status_code}")
 
                     # ✅ Clear the Pipedrive field after quote send, even if no Twilio message
                     clear_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
@@ -211,7 +223,7 @@ def handle_pipedrive_webhook():
                     }
                     activity_url = f"https://api.pipedrive.com/v1/activities?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
                     activity_resp = requests.post(activity_url, json=activity_payload)
-                    print("📌 Activity logged:", activity_resp.status_code, activity_resp.text)
+                    print(f"Activity: {activity_resp.status_code}")
                     
                     # Clear the field if successful
                     clear_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
@@ -256,10 +268,10 @@ def handle_front_webhook():
 
         # If this is likely a test ping with no useful fields
         if "body" not in data or "recipient" not in data:
-            print("Ping received:", data)
+            print("Front ping received")
             return jsonify({"status": "noop"}), 200
 
-        print("Valid event from Front:", data)
+        print("Front event received")
 
         comment_body = data.get("body", "")
         recipient = data.get("recipient", {}).get("handle")
@@ -281,7 +293,6 @@ def handle_front_webhook():
             print("Missing Twilio credentials. Skipping send.")
             return jsonify({"status": "noop"}), 200    
 
-        print("📣 About to call send_whatsapp_template")
         send_status = send_whatsapp_template(recipient, content_sid, {"1": variable_text})
         return jsonify(send_status), 200
 
@@ -328,4 +339,5 @@ def test_send():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)  # Set debug=False for production
