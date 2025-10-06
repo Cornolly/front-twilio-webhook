@@ -163,26 +163,42 @@ def handle_pipedrive_webhook():
                     }
 
                 elif template_name == "payment_released_referral":
-                    # Allow formats like: "Nick 12000 SAR" or "Nick,12000,SAR" or "Nick|12000|SAR"
                     raw = field_value.strip()
-                    # try common separators in order
+
+                    # Prefer a strict separator first to avoid "12,000" issues.
+                    # If you want to enforce one format, keep only "|".
+                    chosen_sep = None
                     for sep in ["|", ",", " "]:
                         if sep in raw:
-                            parts = [p.strip() for p in raw.split(sep)]
+                            chosen_sep = sep
                             break
-                    else:
-                        parts = [raw]  # fallback
 
+                    parts = [raw] if not chosen_sep else [p.strip() for p in raw.split(chosen_sep)]
+
+                    # If there are more than 3 tokens, take the first three.
                     if len(parts) < 3:
                         print(f"❌ Need 3 variables for payment_released_referral, got: {parts}")
                         results.append({"template": template_name, "status": "error", "error": "Need 3 variables"})
                         continue
+                    parts = parts[:3]
+
+                    # Normalise the middle (amount) field: remove commas and leading currency symbols like £, $, SAR stays as var3.
+                    def clean_amount(x):
+                        x = x.strip()
+                        # remove common currency symbols and spaces at start
+                        x = re.sub(r'^[£$\u20ac]', '', x)  # £ $ €
+                        # remove thousand separators
+                        x = x.replace(",", "")
+                        return x
+
+                    parts[1] = clean_amount(parts[1])
 
                     variables = {
-                        "1": parts[0],
-                        "2": parts[1],
-                        "3": parts[2],
+                        "1": parts[0],  # name
+                        "2": parts[1],  # amount (normalised)
+                        "3": parts[2],  # currency (e.g., SAR)
                     }
+
 
                 elif template_name.lower() == "quote":
                     # Special case: send to quote endpoint instead of Twilio
