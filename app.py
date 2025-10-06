@@ -165,38 +165,42 @@ def handle_pipedrive_webhook():
                 elif template_name == "payment_released_referral":
                     raw = field_value.strip()
 
-                    # Prefer a strict separator first to avoid "12,000" issues.
-                    # If you want to enforce one format, keep only "|".
-                    chosen_sep = None
-                    for sep in ["|", ",", " "]:
-                        if sep in raw:
-                            chosen_sep = sep
-                            break
+                    # Prefer a strict delimiter if provided; otherwise split on whitespace ONLY
+                    if "|" in raw:
+                        tokens = [t.strip() for t in raw.split("|")]
+                    else:
+                        tokens = raw.split()  # whitespace split (won't split the comma inside 30,001.29)
 
-                    parts = [raw] if not chosen_sep else [p.strip() for p in raw.split(chosen_sep)]
-
-                    # If there are more than 3 tokens, take the first three.
-                    if len(parts) < 3:
-                        print(f"❌ Need 3 variables for payment_released_referral, got: {parts}")
-                        results.append({"template": template_name, "status": "error", "error": "Need 3 variables"})
+                    if len(tokens) < 3:
+                        print(f"❌ Need 3 variables for payment_released_referral, got: {tokens}")
+                        results.append({"template": template_name, "status": "error", "error": "Need 3 variables: amount currency pd_id"})
                         continue
-                    parts = parts[:3]
 
-                    # Normalise the middle (amount) field: remove commas and leading currency symbols like £, $, SAR stays as var3.
-                    def clean_amount(x):
-                        x = x.strip()
-                        # remove common currency symbols and spaces at start
-                        x = re.sub(r'^[£$\u20ac]', '', x)  # £ $ €
-                        # remove thousand separators
-                        x = x.replace(",", "")
-                        return x
+                    amount_raw, currency_raw, pd_id_raw = tokens[0], tokens[1], tokens[2]
 
-                    parts[1] = clean_amount(parts[1])
+                    # Normalise amount: strip currency symbols/spaces, remove thousands commas
+                    amount_norm = re.sub(r'^[£$\u20ac]\s*', '', amount_raw).replace(",", "")
+                    # Optional: validate it's numeric
+                    try:
+                        float(amount_norm)
+                    except ValueError:
+                        print(f"❌ Invalid amount for payment_released_referral: {amount_raw}")
+                        results.append({"template": template_name, "status": "error", "error": "Invalid amount"})
+                        continue
+
+                    # Normalise currency (expect a 3-letter code)
+                    currency = currency_raw.upper()
+
+                    # PD person id should be digits
+                    if not re.fullmatch(r"\d+", pd_id_raw):
+                        print(f"❌ Invalid PD ID for payment_released_referral: {pd_id_raw}")
+                        results.append({"template": template_name, "status": "error", "error": "Invalid PD ID"})
+                        continue
 
                     variables = {
-                        "1": parts[0],  # name
-                        "2": parts[1],  # amount (normalised)
-                        "3": parts[2],  # currency (e.g., SAR)
+                        "1": amount_norm,  # e.g., 30001.29
+                        "2": currency,     # e.g., GBP
+                        "3": pd_id_raw,    # e.g., 9
                     }
 
 
