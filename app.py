@@ -49,7 +49,7 @@ TEMPLATE_CONTENT_MAP = {
     "quote_amount": "HX4e63c9c8e2d3234fd6b99d3ea1a14f45",
     "feefo_request": "HX3cb6b2df08b5da2f129fa14db6360d05",
     "request_settlement_confirmation": "HXf38446e303ffe1001116f80f5cecce22",
-    "payment_released_referral": "HXd472dddc62e9c8b93e12a35f2006e7c7"
+    "payment_released_referral": "HXb9566f7e05bade6949bd6da2ee650bb6"
 }
 
 # Maps template name to Pipedrive custom field ID
