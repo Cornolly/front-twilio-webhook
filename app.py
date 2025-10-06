@@ -48,7 +48,8 @@ TEMPLATE_CONTENT_MAP = {
     "market_update_ftt": "HX765872487eed72459937b3e85fd4d549",
     "quote_amount": "HX4e63c9c8e2d3234fd6b99d3ea1a14f45",
     "feefo_request": "HX3cb6b2df08b5da2f129fa14db6360d05",
-    "request_settlement_confirmation": "HXf38446e303ffe1001116f80f5cecce22"
+    "request_settlement_confirmation": "HXf38446e303ffe1001116f80f5cecce22",
+    "payment_released_referral": "HXd472dddc62e9c8b93e12a35f2006e7c7"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -69,7 +70,8 @@ TEMPLATE_FIELD_MAP = {
     "market_update_ftt": "71abec0fdc5e9e691c7332a95b4bad3b72559371",
     "quote_amount": "a322fbaee9c8c63ddee6f733873f4ca8204233fb",
     "feefo_request": "b516f03e81f6b97e31db84296acd148c4152afdc",
-    "request_settlement_confirmation": "aa06fc13c3f373d94bc711a134ddf49515ce38c7"
+    "request_settlement_confirmation": "aa06fc13c3f373d94bc711a134ddf49515ce38c7",
+    "payment_released_referral": "76678853d8dd0b4a6f2d1d40915431bd893fc5fc"
 }
 
 @app.route("/", methods=["GET"])
@@ -159,6 +161,29 @@ def handle_pipedrive_webhook():
                         "1": parts[0],
                         "2": parts[1] if len(parts) > 1 else ""
                     }
+
+                elif template_name == "payment_released_referral":
+                    # Allow formats like: "Nick 12000 SAR" or "Nick,12000,SAR" or "Nick|12000|SAR"
+                    raw = field_value.strip()
+                    # try common separators in order
+                    for sep in ["|", ",", " "]:
+                        if sep in raw:
+                            parts = [p.strip() for p in raw.split(sep)]
+                            break
+                    else:
+                        parts = [raw]  # fallback
+
+                    if len(parts) < 3:
+                        print(f"❌ Need 3 variables for payment_released_referral, got: {parts}")
+                        results.append({"template": template_name, "status": "error", "error": "Need 3 variables"})
+                        continue
+
+                    variables = {
+                        "1": parts[0],
+                        "2": parts[1],
+                        "3": parts[2],
+                    }
+
                 elif template_name.lower() == "quote":
                     # Special case: send to quote endpoint instead of Twilio
                     parts = field_value.strip().split(" ", 2)
