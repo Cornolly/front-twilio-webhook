@@ -74,6 +74,7 @@ TEMPLATE_FIELD_MAP = {
     "payment_released_referral": "76678853d8dd0b4a6f2d1d40915431bd893fc5fc"
 }
 
+
 @app.route("/", methods=["GET"])
 def home():
     print("Health check received")  # Add this line
