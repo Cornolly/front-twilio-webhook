@@ -49,7 +49,8 @@ TEMPLATE_CONTENT_MAP = {
     "quote_amount": "HX4e63c9c8e2d3234fd6b99d3ea1a14f45",
     "feefo_request": "HX3cb6b2df08b5da2f129fa14db6360d05",
     "request_settlement_confirmation": "HXf38446e303ffe1001116f80f5cecce22",
-    "payment_released_referral": "HXb9566f7e05bade6949bd6da2ee650bb6"
+    "payment_released_referral": "HXb9566f7e05bade6949bd6da2ee650bb6",
+    "tips": "HX88c606bc1918c125393d36e396e03a5c"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -71,7 +72,8 @@ TEMPLATE_FIELD_MAP = {
     "quote_amount": "a322fbaee9c8c63ddee6f733873f4ca8204233fb",
     "feefo_request": "b516f03e81f6b97e31db84296acd148c4152afdc",
     "request_settlement_confirmation": "aa06fc13c3f373d94bc711a134ddf49515ce38c7",
-    "payment_released_referral": "76678853d8dd0b4a6f2d1d40915431bd893fc5fc"
+    "payment_released_referral": "76678853d8dd0b4a6f2d1d40915431bd893fc5fc",
+    "tips": "6d72df5ef2b9eb2694ab21a22af5e5705717affd"
 }
 
 
@@ -92,6 +94,15 @@ def debug_print(*args, **kwargs):
 @app.route("/front-webhook", methods=["GET"])
 def verify_webhook():
     return jsonify({"status": "ok"}), 200
+
+def split_pair_to_vars(pair_text: str):
+    """Accepts 'SARGBP', 'sar/gbp', 'SAR GBP' etc. Returns {'1': base, '2': quote, '3': base}."""
+    pair = re.sub(r'[^A-Z]', '', (pair_text or '').upper())
+    if len(pair) != 6:
+        raise ValueError(f"Currency pair must be 6 letters (e.g. SARGBP). Got: {pair_text!r}")
+    base, quote = pair[:3], pair[3:]
+    return {"1": base, "2": quote, "3": base}
+
 
 @app.route("/pipedrive-webhook", methods=["POST"])
 def handle_pipedrive_webhook():
@@ -163,6 +174,16 @@ def handle_pipedrive_webhook():
                         "2": parts[1] if len(parts) > 1 else ""
                     }
 
+                elif template_name == "tips":
+                    # PD field should contain SARGBP (or 'SAR/GBP', 'sar gbp', etc.)
+                    try:
+                        variables = split_pair_to_vars(field_value)
+                    except ValueError as e:
+                        print(f"❌ {e}")
+                        results.append({"template": template_name, "status": "error", "error": str(e)})
+                        continue
+
+                
                 elif template_name == "payment_released_referral":
                     raw = field_value.strip()
 
