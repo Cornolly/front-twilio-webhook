@@ -50,7 +50,10 @@ TEMPLATE_CONTENT_MAP = {
     "feefo_request": "HX3cb6b2df08b5da2f129fa14db6360d05",
     "request_settlement_confirmation": "HXf38446e303ffe1001116f80f5cecce22",
     "payment_released_referral": "HXb9566f7e05bade6949bd6da2ee650bb6",
-    "tips": "HX88c606bc1918c125393d36e396e03a5c"
+    "tips": "HX88c606bc1918c125393d36e396e03a5c",
+    "signup_docs": "HXcb0286305fa09c209e9d9f4ea3caf08b"
+
+
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -73,7 +76,8 @@ TEMPLATE_FIELD_MAP = {
     "feefo_request": "b516f03e81f6b97e31db84296acd148c4152afdc",
     "request_settlement_confirmation": "aa06fc13c3f373d94bc711a134ddf49515ce38c7",
     "payment_released_referral": "76678853d8dd0b4a6f2d1d40915431bd893fc5fc",
-    "tips": "6d72df5ef2b9eb2694ab21a22af5e5705717affd"
+    "tips": "6d72df5ef2b9eb2694ab21a22af5e5705717affd",
+    "signup_docs": "de76832c599bfedd14e027666f7b418ed90a65ce"
 }
 
 
