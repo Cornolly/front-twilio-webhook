@@ -55,7 +55,8 @@ TEMPLATE_CONTENT_MAP = {
     "sab_statement": "HXcc7b9f2ca20de356d49781c4ffb49c2a",
     "get_started": "HXa5b6d2a538543999fc8820cb414fbdf7",
     "quote_tips": "HX0a5cb200cc70c627679db007daaa3980",
-    "doc_email": "HX2c36decd6afee23ed75f7769a389f1fc"
+    "doc_email": "HX2c36decd6afee23ed75f7769a389f1fc",
+    "scio_terms": "HX2592e5e3528539e39d20e8e9f8a7d052",
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -83,7 +84,8 @@ TEMPLATE_FIELD_MAP = {
     "sab_statement": "fee0adba212034720f41444545bc97e10154f045",
     "get_started": "edeb777424af67eefd570f1e6f8d6e7e5d39e09e",
     "quote_tips": "d03d8914feae2025033af46c1d24e09144262693",
-    "doc_email": "98d619ca6534ea827eb3465f9e5fda92f0578b32"
+    "doc_email": "98d619ca6534ea827eb3465f9e5fda92f0578b32",
+    "scio_terms": "bb58212d8bd299b571ae5aa22d15269212de102d"
 }
 
 
@@ -176,7 +178,7 @@ def handle_pipedrive_webhook():
                 # ✅ Variable handling logic per template
                 if template_name == "24hrs":
                     variables = {}
-                elif template_name in ["payment_account", "payment_which", "quote_amount", "feefo_request", "request_settlement_confirmation", "quote_tips"]:
+                elif template_name in ["payment_account", "payment_which", "quote_amount", "feefo_request", "request_settlement_confirmation", "quote_tips", "scio_terms"]:
                     # Split into two variables by the first space
                     parts = field_value.strip().split(" ", 1)
                     variables = {
