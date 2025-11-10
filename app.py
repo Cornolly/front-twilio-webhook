@@ -56,7 +56,7 @@ TEMPLATE_CONTENT_MAP = {
     "get_started": "HXa5b6d2a538543999fc8820cb414fbdf7",
     "quote_tips": "HX0a5cb200cc70c627679db007daaa3980",
     "doc_email": "HX2c36decd6afee23ed75f7769a389f1fc",
-    "scio_terms": "HX2592e5e3528539e39d20e8e9f8a7d052",
+    "scio_terms": "HX42cda745d4c86d237b57a261495023af"
 }
 
 # Maps template name to Pipedrive custom field ID
