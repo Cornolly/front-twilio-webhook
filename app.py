@@ -57,7 +57,8 @@ TEMPLATE_CONTENT_MAP = {
     "quote_tips": "HX0a5cb200cc70c627679db007daaa3980",
     "doc_email": "HX2c36decd6afee23ed75f7769a389f1fc",
     "scio_terms": "HX42cda745d4c86d237b57a261495023af",
-    "signaturesense": "HX6a7f72d93eef510bf9ace988fcdf2f5b"
+    "signaturesense": "HX6a7f72d93eef510bf9ace988fcdf2f5b",
+    "scio_and_equals_terms": "HXe63f2f4a3c64e9f8fbca83c8d123db43"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -87,7 +88,8 @@ TEMPLATE_FIELD_MAP = {
     "quote_tips": "d03d8914feae2025033af46c1d24e09144262693",
     "doc_email": "98d619ca6534ea827eb3465f9e5fda92f0578b32",
     "scio_terms": "bb58212d8bd299b571ae5aa22d15269212de102d",
-    "signaturesense": "8ff2ba4e3f4df6a8ac45ff315c7bef513c8234bc"
+    "signaturesense": "8ff2ba4e3f4df6a8ac45ff315c7bef513c8234bc",
+    "scio_and_equals_terms": "37dc201b65b005dc0ab4bf6357a34a27101fadde"
 }
 
 
