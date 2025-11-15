@@ -428,7 +428,6 @@ def test_send():
     result = send_whatsapp_template(phone, content_sid, {"1": variable_text})
     return jsonify(result), 200
 
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)  # Set debug=False for production
