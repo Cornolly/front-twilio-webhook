@@ -124,7 +124,6 @@ def split_pair_to_vars(pair_text: str):
     base, quote = pair[:3], pair[3:]
     return {"1": base, "2": quote, "3": base}
 
-
 @app.route("/pipedrive-webhook", methods=["POST"])
 def handle_pipedrive_webhook():
     try:
