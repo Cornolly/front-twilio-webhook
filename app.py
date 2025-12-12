@@ -37,7 +37,7 @@ TEMPLATE_CONTENT_MAP = {
     "settlement_received": "HX706c585bc08250b45418ae5c6da063a9",
     "24hrs": "HXbafe219694047b3d258a789df58da66d",
     "ftt_chase": "HXfe271e7714fa29bb31625c1080081d8b",
-    "payment_account": "HX373b8d1366c112e7001acffe88f99056",
+    "payment_account": "HX52deb7bd48ea8b2f1742c5ffdb09d826",
     "payment_which": "HX6434eec56092adba95513f65d82bc26d",
     "gb_sar": "HX046f744c9a57569d809d7c1954b867ef",
     "colleagues": "HXcf671083796da95467bb1b5b84b0def0",
