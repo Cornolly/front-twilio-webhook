@@ -35,7 +35,7 @@ print("🚀 Application initialization complete")
 TEMPLATE_CONTENT_MAP = {
     "payment_released": "HX6b4482f404e6b063984df49dc3b3e69c",
     "settlement_received": "HX706c585bc08250b45418ae5c6da063a9",
-    "24hrs": "HXbafe219694047b3d258a789df58da66d",
+    "24hrs": "HX1e412e64b25964ab226f5de522dab1eb",
     "ftt_chase": "HXfe271e7714fa29bb31625c1080081d8b",
     "payment_account": "HX373b8d1366c112e7001acffe88f99056",
     "payment_which": "HX6434eec56092adba95513f65d82bc26d",
