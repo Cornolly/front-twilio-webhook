@@ -64,7 +64,8 @@ TEMPLATE_CONTENT_MAP = {
     "next_exchange": "HXff6a8e293fd00d9ba474f191817bb2d2",
     "api_down": "HX010913785628c422e493b900b30e8195",
     "signaturesense_sumsub": "HXe7f127f05b981706891376ff7dc41d11",
-    "ftt_chase_calendar": "HXbc7ae8533ff4ae809ccac7094c431ca3"
+    "ftt_chase_calendar": "HXbc7ae8533ff4ae809ccac7094c431ca3",
+    "add_alert_order": "HX37de908bb37db8a9cf148f7a252c8da9"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -101,7 +102,8 @@ TEMPLATE_FIELD_MAP = {
     "next_exchange": "9a02d5a0f564d482747187ebf9ac0798d37ae0fd",
     "api_down": "eaffe302dc8d9a5e76d1bc25056e445d09750de8",
     "signaturesense_sumsub": "1cb2222c14a45ac2a7b10fab2e046f4fc7b5050e",
-    "ftt_chase_calendar": "0b029c44cbb019951c693950892624ca4c58d94c"
+    "ftt_chase_calendar": "0b029c44cbb019951c693950892624ca4c58d94c",
+    "add_alert_order": "ce9a2072a19ee3868d3632341899be871078007c"
 }
 
 
