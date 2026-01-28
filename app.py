@@ -65,7 +65,8 @@ TEMPLATE_CONTENT_MAP = {
     "api_down": "HX010913785628c422e493b900b30e8195",
     "signaturesense_sumsub": "HXe7f127f05b981706891376ff7dc41d11",
     "ftt_chase_calendar": "HXbc7ae8533ff4ae809ccac7094c431ca3",
-    "add_alert_order": "HX37de908bb37db8a9cf148f7a252c8da9"
+    "add_alert_order": "HX37de908bb37db8a9cf148f7a252c8da9",
+    "auto_exchange": "HXd6b82937382ea417ee973f5537c127f3"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -103,7 +104,8 @@ TEMPLATE_FIELD_MAP = {
     "api_down": "eaffe302dc8d9a5e76d1bc25056e445d09750de8",
     "signaturesense_sumsub": "1cb2222c14a45ac2a7b10fab2e046f4fc7b5050e",
     "ftt_chase_calendar": "0b029c44cbb019951c693950892624ca4c58d94c",
-    "add_alert_order": "ce9a2072a19ee3868d3632341899be871078007c"
+    "add_alert_order": "ce9a2072a19ee3868d3632341899be871078007c",
+    "auto_exchange": "ae91a0df2dfe674acb21e1937303bff4046aebfc"
 }
 
 
@@ -299,6 +301,15 @@ def handle_pipedrive_webhook():
 
                     results.append({"template": template_name, "status": "sent_to_quote_api", "response": quote_response.text})
                     continue  # Skip Twilio send for Quote
+
+                elif template_name == "auto_exchange":
+                    # Split into three variables by spaces
+                    parts = field_value.strip().split(" ", 2)
+                    variables = {
+                        "1": parts[0],
+                        "2": parts[1] if len(parts) > 1 else "",
+                        "3": parts[2] if len(parts) > 2 else ""
+                    }    
                 
                 else:
                     variables = {"1": field_value}
