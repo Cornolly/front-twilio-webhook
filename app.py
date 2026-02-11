@@ -4,6 +4,7 @@ import requests
 import json
 from dotenv import load_dotenv
 import re
+from flask import Response
 
 DEBUG_MODE = os.getenv("DEBUG_LOGGING", "false").lower() == "true"
 
@@ -105,8 +106,84 @@ TEMPLATE_FIELD_MAP = {
     "signaturesense_sumsub": "1cb2222c14a45ac2a7b10fab2e046f4fc7b5050e",
     "ftt_chase_calendar": "0b029c44cbb019951c693950892624ca4c58d94c",
     "add_alert_order": "ce9a2072a19ee3868d3632341899be871078007c",
-    "auto_exchange": "ae91a0df2dfe674acb21e1937303bff4046aebfc"
+    "auto_exchange": "ae91a0df2dfe674acb21e1937303bff4046aebfc",
+    "vcard": "9e5dc6414616946268d3d02df75bdee7599795d2"
 }
+
+def build_vcard(person_data: dict) -> str:
+    name = (person_data.get("name") or "").strip() or "Unknown"
+    phones = person_data.get("phone") or []
+    emails = person_data.get("email") or []
+
+    phone = phones[0].get("value") if phones else ""
+    email = emails[0].get("value") if emails else ""
+
+    # Keep it simple and broadly compatible (vCard 3.0)
+    lines = [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        f"FN:{name}",
+    ]
+    if phone:
+        lines.append(f"TEL;TYPE=CELL:{phone}")
+    if email:
+        lines.append(f"EMAIL;TYPE=INTERNET:{email}")
+    lines.append("END:VCARD")
+    return "\r\n".join(lines) + "\r\n"
+
+
+@app.route("/vcard/<int:person_id>", methods=["GET"])
+def vcard_download(person_id: int):
+    token = request.args.get("token")
+    if not token or token != os.getenv("VCARD_TOKEN"):
+        return jsonify({"status": "forbidden"}), 403
+
+    person_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
+    resp = requests.get(person_url, timeout=20)
+    data = resp.json().get("data")
+    if not data:
+        return jsonify({"status": "not_found"}), 404
+
+    vcf = build_vcard(data)
+    return Response(
+        vcf,
+        mimetype="text/vcard",
+        headers={"Content-Disposition": f'attachment; filename="pipedrive_{person_id}.vcf"'}
+    )
+
+
+def send_whatsapp_contact(to_number: str, person_id: int, person_data: dict):
+    """
+    Sends a .vcf contact card via Twilio WhatsApp by attaching a MediaUrl that points to our /vcard endpoint.
+    """
+    if not all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM]):
+        return {"status": "error", "details": "Missing Twilio credentials"}
+
+    base_url = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
+    token = os.getenv("VCARD_TOKEN")
+    if not base_url or not token:
+        return {"status": "error", "details": "Missing PUBLIC_BASE_URL or VCARD_TOKEN env vars"}
+
+    sanitized_to = sanitize_number(to_number)
+
+    # Twilio will fetch this URL to attach the vCard as media
+    media_url = f"{base_url}/vcard/{person_id}?token={token}"
+
+    url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json"
+    payload = {
+        "To": f"whatsapp:{sanitized_to}",
+        "From": f"whatsapp:{TWILIO_WHATSAPP_FROM}",
+        "Body": f"Contact card: {person_data.get('name','')}".strip(),
+        "MediaUrl": media_url
+    }
+
+    response = requests.post(url, data=payload, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN), timeout=20)
+    print(f"Twilio vCard: {response.status_code}")
+
+    if response.status_code in (200, 201):
+        return {"status": "success"}
+    return {"status": "error", "details": response.text}
+
 
 
 @app.route("/", methods=["GET"])
@@ -190,9 +267,27 @@ def handle_pipedrive_webhook():
                 print(f"📤 {template_name} → {phone}")
                 content_sid = TEMPLATE_CONTENT_MAP.get(template_name)
 
-                if not content_sid:
-                    results.append({"template": template_name, "status": "sent_to_quote_api", "response_code": quote_response.status_code})
+                # ✅ Special case: vCard send (no ContentSid)
+                if template_name == "vcard":
+                    # field_value should be the destination number (e.g. your number)
+                    vcard_to = field_value.strip()
+
+                    send_status = send_whatsapp_contact(vcard_to, int(person_id), person_data)
+                    results.append({"template": "vcard", "status": send_status.get("status"), "details": send_status.get("details")})
+
+                    # Clear the field if successful
+                    if send_status.get("status") == "success":
+                        clear_url = f"https://api.pipedrive.com/v1/persons/{person_id}?api_token={os.getenv('PIPEDRIVE_API_KEY')}"
+                        clear_payload = {field_id: ""}
+                        clear_resp = requests.put(clear_url, json=clear_payload)
+                        print(f"🧹 Cleared field {field_id}: {clear_resp.status_code}")
+
                     continue
+
+                if not content_sid:
+                    results.append({"template": template_name, "status": "error", "error": f"No ContentSid found for template '{template_name}'"})
+                    continue
+
     
                 # ✅ Variable handling logic per template
                 if template_name == "24hrs":
