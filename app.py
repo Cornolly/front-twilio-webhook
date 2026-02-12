@@ -68,7 +68,7 @@ TEMPLATE_CONTENT_MAP = {
     "ftt_chase_calendar": "HXbc7ae8533ff4ae809ccac7094c431ca3",
     "add_alert_order": "HX37de908bb37db8a9cf148f7a252c8da9",
     "auto_exchange": "HXd6b82937382ea417ee973f5537c127f3",
-    "jumio_ebury": "HX6d7133512f332b996a96cbce3361c409"
+    "jumio_ebury": "HX922dde34ec956077716fc62cf32dc475"
 }
 
 # Maps template name to Pipedrive custom field ID
