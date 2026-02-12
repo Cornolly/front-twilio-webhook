@@ -67,7 +67,8 @@ TEMPLATE_CONTENT_MAP = {
     "signaturesense_sumsub": "HXe7f127f05b981706891376ff7dc41d11",
     "ftt_chase_calendar": "HXbc7ae8533ff4ae809ccac7094c431ca3",
     "add_alert_order": "HX37de908bb37db8a9cf148f7a252c8da9",
-    "auto_exchange": "HXd6b82937382ea417ee973f5537c127f3"
+    "auto_exchange": "HXd6b82937382ea417ee973f5537c127f3",
+    "jumio_ebury": "HX6d7133512f332b996a96cbce3361c409"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -107,7 +108,8 @@ TEMPLATE_FIELD_MAP = {
     "ftt_chase_calendar": "0b029c44cbb019951c693950892624ca4c58d94c",
     "add_alert_order": "ce9a2072a19ee3868d3632341899be871078007c",
     "auto_exchange": "ae91a0df2dfe674acb21e1937303bff4046aebfc",
-    "vcard": "9e5dc6414616946268d3d02df75bdee7599795d2"
+    "vcard": "9e5dc6414616946268d3d02df75bdee7599795d2",
+    "jumio_ebury": "495f94fc8594a6b9d1fd89e4935b5178e2073af9"
 }
 
 def build_vcard(person_data: dict) -> str:
@@ -292,7 +294,7 @@ def handle_pipedrive_webhook():
                 # ✅ Variable handling logic per template
                 if template_name == "24hrs":
                     variables = {}
-                elif template_name in ["payment_account", "payment_which", "quote_amount", "feefo_request", "request_settlement_confirmation", "quote_tips", "scio_terms", "scio_and_equals_terms", "1k_reminder"]:
+                elif template_name in ["payment_account", "payment_which", "quote_amount", "feefo_request", "request_settlement_confirmation", "quote_tips", "scio_terms", "scio_and_equals_terms", "1k_reminder", "jumio_ebury"]:
                     # Split into two variables by the first space
                     parts = field_value.strip().split(" ", 1)
                     variables = {
