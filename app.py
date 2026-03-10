@@ -71,7 +71,7 @@ TEMPLATE_CONTENT_MAP = {
     "jumio_ebury": "HX922dde34ec956077716fc62cf32dc475",
     "sab_mt103": "HXbd4aefadcf574d7b90a4a169ff7892bc",
     "intro_thanks": "HXaf99711e63cc8f5919c2fa3dba4744ed",
-    "25k_launch": "HXed469f9ea117edd9cb24699a7bed1839"
+    "25k_launch": "HX193d5e9fcf8a0795ca7759f3073a95a2"
 }
 
 # Maps template name to Pipedrive custom field ID
