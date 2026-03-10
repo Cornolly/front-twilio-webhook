@@ -70,7 +70,8 @@ TEMPLATE_CONTENT_MAP = {
     "auto_exchange": "HXd6b82937382ea417ee973f5537c127f3",
     "jumio_ebury": "HX922dde34ec956077716fc62cf32dc475",
     "sab_mt103": "HXbd4aefadcf574d7b90a4a169ff7892bc",
-    "intro_thanks": "HXaf99711e63cc8f5919c2fa3dba4744ed"
+    "intro_thanks": "HXaf99711e63cc8f5919c2fa3dba4744ed",
+    "25k_launch": "HX11fea44d38004d08d2564055a5c2cd06"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -113,7 +114,8 @@ TEMPLATE_FIELD_MAP = {
     "vcard": "9e5dc6414616946268d3d02df75bdee7599795d2",
     "jumio_ebury": "495f94fc8594a6b9d1fd89e4935b5178e2073af9",
     "sab_mt103": "f0dbdc4b76f490ccf864c30c51cf5c38fadc6897",
-    "intro_thanks": "217651b4375072fd7bb33db4542c771b9ebeb0c3"
+    "intro_thanks": "217651b4375072fd7bb33db4542c771b9ebeb0c3",
+    "25k_launch": "ff462922ad4a82498cf16d463b90af6fee345292"
 }
 
 def build_vcard(person_data: dict) -> str:
