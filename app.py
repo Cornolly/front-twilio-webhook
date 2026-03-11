@@ -118,6 +118,24 @@ TEMPLATE_FIELD_MAP = {
     "25k_launch": "ff462922ad4a82498cf16d463b90af6fee345292"
 }
 
+def send_sms(to_number, message_body):
+    sanitized_number = sanitize_number(to_number)
+    url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json"
+
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    payload = {
+        "To": sanitized_number,           # No "whatsapp:" prefix
+        "From": os.getenv("TWILIO_SMS_FROM"),  # Your Twilio SMS number (e.g. +441234567890)
+        "Body": message_body
+    }
+
+    response = requests.post(
+        url, headers=headers, data=payload, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    )
+
+    print(f"Twilio SMS: {response.status_code}")
+    return {"status": "success"} if response.status_code == 201 else {"status": "error", "details": response.text}
+
 def build_vcard(person_data: dict) -> str:
     name = (person_data.get("name") or "").strip() or "Unknown"
     phones = person_data.get("phone") or []
