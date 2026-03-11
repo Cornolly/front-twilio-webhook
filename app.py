@@ -136,6 +136,13 @@ def send_sms(to_number, message_body):
     print(f"Twilio SMS: {response.status_code}")
     return {"status": "success"} if response.status_code == 201 else {"status": "error", "details": response.text}
 
+@app.route("/test-sms", methods=["POST"])
+def test_sms():
+    phone = request.json.get("phone")
+    message = request.json.get("message")
+    result = send_sms(phone, message)
+    return jsonify(result), 200
+
 def build_vcard(person_data: dict) -> str:
     name = (person_data.get("name") or "").strip() or "Unknown"
     phones = person_data.get("phone") or []
