@@ -72,7 +72,8 @@ TEMPLATE_CONTENT_MAP = {
     "sab_mt103": "HXbd4aefadcf574d7b90a4a169ff7892bc",
     "intro_thanks": "HXaf99711e63cc8f5919c2fa3dba4744ed",
     "25k_launch": "HX193d5e9fcf8a0795ca7759f3073a95a2",
-    "sumsub_24hrs": "HXe8f0f748112207739336fb285c777a9e"
+    "sumsub_24hrs": "HXe8f0f748112207739336fb285c777a9e",
+    "new_sumsub_sent": "HX697b0beca69f73eb109e26877d5523ec"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -117,7 +118,8 @@ TEMPLATE_FIELD_MAP = {
     "sab_mt103": "f0dbdc4b76f490ccf864c30c51cf5c38fadc6897",
     "intro_thanks": "217651b4375072fd7bb33db4542c771b9ebeb0c3",
     "25k_launch": "ff462922ad4a82498cf16d463b90af6fee345292",
-    "sumsub_24hrs": "8ee9cc9a6ccd0fea325272ecd89fd9896a4f1a10"
+    "sumsub_24hrs": "8ee9cc9a6ccd0fea325272ecd89fd9896a4f1a10",
+    "new_sumsub_sent": "a128a5d2066dec122c1611ec967fab34a8e88b5a"
 }
 
 def send_sms(to_number, message_body):
