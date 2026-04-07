@@ -334,7 +334,9 @@ def handle_pipedrive_webhook():
     
                 # ✅ Variable handling logic per template
                 if template_name == "24hrs":
-                    variables = {}
+                    variables = {
+                        "1": field_value.strip()
+                    }
                 elif template_name in ["payment_account", "payment_which", "quote_amount", "feefo_request", "request_settlement_confirmation", "quote_tips", "scio_terms", "scio_and_equals_terms", "1k_reminder", "jumio_ebury", "intro_thanks"]:
                     # Split into two variables by the first space
                     parts = field_value.strip().split(" ", 1)
