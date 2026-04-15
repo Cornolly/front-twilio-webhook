@@ -76,7 +76,8 @@ TEMPLATE_CONTENT_MAP = {
     "new_sumsub_sent": "HX697b0beca69f73eb109e26877d5523ec",
     "payment_account_v3": "HX114f224ea1d3e4edf312dcdb050300f6",
     "add_equals_traded": "HXe47ee8abeaea3842c638138464ea0b45",
-    "add_equals_notrade": "HX3fc56ee5c399fc129149dccdcafa55dc"
+    "add_equals_notrade": "HX3fc56ee5c399fc129149dccdcafa55dc",
+    "new_sar_details": "HX76e157d9246db91425a6e89bb0b45e3e"
 }
 
 # Maps template name to Pipedrive custom field ID
@@ -125,7 +126,8 @@ TEMPLATE_FIELD_MAP = {
     "new_sumsub_sent": "a128a5d2066dec122c1611ec967fab34a8e88b5a",
     "payment_account_v3": "4dab0765b3f54484bc3c710eb88303bf37febdc6",
     "add_equals_traded": "d19f5d5223ef526302f2e96c5c317d9d358614fd",
-    "add_equals_notrade": "2ae3988f66245d1ec462628085fdc5f46f3cd1c5"
+    "add_equals_notrade": "2ae3988f66245d1ec462628085fdc5f46f3cd1c5",
+    "new_sar_details": "a016c308b19c9939fbdbba32c75d1ff9ed2f385a"
 }
 
 def send_sms(to_number, message_body):
@@ -353,7 +355,32 @@ def handle_pipedrive_webhook():
                         print(f"❌ {e}")
                         results.append({"template": template_name, "status": "error", "error": str(e)})
                         continue
+                
+                elif template_name == "new_sar_details":
+                    raw = field_value.strip()
 
+                    if "|" in raw:
+                        tokens = [t.strip() for t in raw.split("|")]
+                    else:
+                        # Fallback: first token = first name, last token = IBAN, middle = full name
+                        tokens_ws = raw.split()
+                        if len(tokens_ws) >= 3:
+                            tokens = [tokens_ws[0], " ".join(tokens_ws[1:-1]), tokens_ws[-1]]
+                        else:
+                            tokens = tokens_ws
+
+                    if len(tokens) < 3:
+                        print(f"❌ Need 3 variables for new_sar_details, got: {tokens}")
+                        results.append({"template": template_name, "status": "error", "error": "Need 3 variables: first_name full_name iban"})
+                        continue
+
+                    first_name, full_name, iban = tokens[0], tokens[1], tokens[2]
+
+                    variables = {
+                        "1": first_name,   # e.g. Nick
+                        "2": full_name,    # e.g. Nick Cornford
+                        "3": iban,         # e.g. GB95SPPV23188420383356
+                    }
                 
                 elif template_name == "payment_released_referral":
                     raw = field_value.strip()
