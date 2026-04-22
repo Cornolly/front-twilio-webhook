@@ -45,7 +45,7 @@ TEMPLATE_CONTENT_MAP = {
     "activated": "HX3c3ffc8ee57ffaf52d5fc1b5333129d3",
     "sar_scio": "HX04e292959d0113b0860b44308a83e5d1",
     "head_of_trading": "HX1ea7ef8a998d1ede17f89b2bfdac384e",
-    "quote_followup": "HX7783b35f18ce38d7c87c6aa34c5375e8",
+    "quote_followup": "HX08de1b6374e324be39d98a511657af93",
     "market_update_ftt": "HX765872487eed72459937b3e85fd4d549",
     "quote_amount": "HX4e63c9c8e2d3234fd6b99d3ea1a14f45",
     "feefo_request": "HX3cb6b2df08b5da2f129fa14db6360d05",
